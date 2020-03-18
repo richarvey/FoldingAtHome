@@ -15,3 +15,15 @@ docker run -d -p7396:7396 richarvey/foldingathome:latest
 ```
 
 You can get to the webUI on [http://localhost:7396](http://localhost:7396)
+
+### AWS Cloud Development Toolking (CDK)
+
+The `cdk.json` file tells the CDK Toolkit how to execute your app.
+
+#### Useful commands
+
+ * `npm install -g aws-cdk`	install the aws cdk
+ * `npm run build`   compile typescript to js
+ * `cdk diff`        compare deployed stack with current state
+ * `cdk synth`       emits the synthesized CloudFormation template
+ * `cdk deploy`      deploy this stack to your default AWS account/region
