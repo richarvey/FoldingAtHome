@@ -1,0 +1,27 @@
+piVersion: apps/v1
+kind: Deployment
+metadata:
+  name: folding-at-home
+  namespace: dev
+  labels:
+    app: folding-at-home
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: folding-at-home
+  template:
+    metadata:
+      labels:
+        app: folding-at-home
+    spec:
+      containers:
+      - name: folding-at-home
+        image: richarvey/foldingathome:latest
+        ports:
+        - containerPort: 7396
+        resources:
+          requests:
+            memory: "2048Mi"
+          limits:
+            memory: "2048Mi"

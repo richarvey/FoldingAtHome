@@ -58,3 +58,14 @@ Using the aws CLI and changing the ARN / region:
 ```
 aws ecs put-cluster-capacity-providers --cluster arn:aws:ecs:eu-west-1:YOUR_ACCOUNT_ID:cluster/CdkfoldingStack-FoldingClusterYOUR_CLUSTER_UID --capacity-providers FARGATE FARGATE_SPOT --default-capacity-provider-strategy capacityProvider=FARGATE_SPOT,weight=100 --region eu-west-1
 ```
+
+## Running on Kubernetes
+
+To run on kubernetes in AWS, GCP, Azure and other simply run the following:
+
+```
+cd k8s
+kubectl create namespace dev
+kubectl apply -f foldingathome-deployment.yaml
+```
+ 
