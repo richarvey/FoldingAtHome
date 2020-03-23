@@ -1,23 +1,23 @@
 ApiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: folding-at-home
+  name: folding-at-home-gpu
   namespace: dev
   labels:
-    app: folding-at-home
+    app: folding-at-home-gpu
 spec:
-  replicas: 10
+  replicas: 3
   selector:
     matchLabels:
-      app: folding-at-home
+      app: folding-at-home-gpu
   template:
     metadata:
       labels:
-        app: folding-at-home
+        app: folding-at-home-gpu
     spec:
       containers:
-      - name: folding-at-home
-        image: richarvey/foldingathome:latest
+      - name: folding-at-home-gpu
+        image: richarvey/foldingathome:gpu
         ports:
         - containerPort: 7396
         resources:
@@ -25,3 +25,4 @@ spec:
             memory: "2048Mi"
           limits:
             memory: "2048Mi"
+            nvidia.com/gpu: 1
