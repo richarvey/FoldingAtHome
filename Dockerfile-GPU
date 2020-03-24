@@ -1,24 +1,59 @@
-FROM debian:stretch-slim
+FROM ubuntu:18.04 as base
+ENV DEBIAN_FRONTEND=noninteractive \
+    TINI_VERSION=v0.18.0
 
-ENV FAH_MINOR=1
-ENV FAH_MAJOR=7.5
+ARG VERSION=7.5.1
+ARG VERSION_MAJOR=7.5
 
-ENV DEBIAN_FRONTEND=noninteractive
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc /tini.asc
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
-        curl adduser bzip2 dh-python python-gnome2 &&\
-	curl --insecure https://download.foldingathome.org/releases/public/release/fahclient/debian-stable-64bit/v${FAH_MAJOR}/fahclient_${FAH_MAJOR}.${FAH_MINOR}_amd64.deb > /tmp/fah.deb &&\
-	curl --insecure https://download.foldingathome.org/releases/public/release/fahcontrol/debian-stable-64bit/v${FAH_MAJOR}/fahcontrol_${FAH_MAJOR}.${FAH_MINOR}-1_all.deb > /tmp/fah-control.deb &&\
-        mkdir -p /etc/fahclient/ &&\
-        touch /etc/fahclient/config.xml &&\
-        dpkg -i --force-depends /tmp/fah.deb &&\
-        dpkg -i --force-depends /tmp/fah-control.deb &&\
-        apt-get remove -y curl &&\
-        apt-get autoremove -y &&\
-        rm --recursive --verbose --force /tmp/* /var/log/* /var/lib/apt/
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+      curl \
+      gnupg \
+      bzip2 \
+      ca-certificates \
+    && curl -o /tmp/fah.deb https://download.foldingathome.org/releases/public/release/fahclient/debian-stable-64bit/v${VERSION_MAJOR}/fahclient_${VERSION}_amd64.deb \
+    && dpkg --force-depends --install /tmp/fah.deb \
+    && gpg --keyserver hkp://ha.pool.sks-keyservers.net --recv-keys "595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7" || \
+      gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7" || \
+      gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7" || \
+      gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys "595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7" ; \
+      gpg --batch --verify /tini.asc /tini \
+    && chmod +x /tini  
 
-EXPOSE 7396 36330
+FROM nvidia/opencl:runtime-ubuntu18.04
 
-ENTRYPOINT ["FAHClient", "--web-allow=0/0:7396", "--allow=0/0:7396"]
-CMD ["--user=Anonymous", "--team=240110", "--gpu=true", "--smp=true", "--power=full"]
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
 
+
+#Add needed nvidia environment variables for https://github.com/NVIDIA/nvidia-docker
+ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,graphics,utility"
+ENV NVIDIA_VISIBLE_DEVICES="all"
+
+COPY --from=base /tini /bin/tini
+COPY --from=base /usr/bin/FAH* /usr/bin/
+
+WORKDIR /app
+
+# Install opencl 
+RUN mkdir -p /usr/share/doc/fahclient/ \
+    && touch /usr/share/doc/fahclient/sample-config.xml \
+    && apt-get update \
+    && apt-get install --no-install-recommends -y \
+      ocl-icd-opencl-dev \
+    && apt-get clean autoclean \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/ /var/lib/dpkg/ /var/lib/cache/ /var/lib/log/ \
+    && groupadd -r fah \
+    && useradd -r -g fah fah \
+    && chown -R fah /app
+
+EXPOSE 7396 7396
+USER fah
+
+ENTRYPOINT ["/bin/tini", "--", "/usr/bin/FAHClient", "--web-allow=0/0:7396", "--allow=0/0:7396", "--smp=true"]
+CMD ["--user=Anonymous", "--team=240110", "--power=full", "--gpu-usage=100", "--cpu-usage=100"]
