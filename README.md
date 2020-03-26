@@ -68,4 +68,27 @@ cd k8s
 kubectl create namespace dev
 kubectl apply -f foldingathome-deployment.yaml
 ```
- 
+
+## GPU Support on EKS
+
+You'll need [eksctl](https://eksctl.io) installed for the following instructions
+
+First of all build your EKS cluster with p2 instances
+
+```
+eksctl create cluster --node-type=p2.xlarge
+```
+
+Now enable the NVIDA drivers
+
+```
+kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/master/nvidia-device-plugin.yml
+```
+
+Now launch the deployment:
+
+```
+cd k8s
+kubectl create namespace dev
+kubectl apply -f foldingathome-GPU-deployment.yaml
+```

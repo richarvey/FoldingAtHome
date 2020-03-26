@@ -6,7 +6,7 @@ metadata:
   labels:
     app: folding-at-home-gpu
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: folding-at-home-gpu
