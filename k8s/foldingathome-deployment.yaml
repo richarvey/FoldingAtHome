@@ -18,6 +18,7 @@ spec:
       containers:
       - name: folding-at-home
         image: richarvey/foldingathome:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 7396
         resources:

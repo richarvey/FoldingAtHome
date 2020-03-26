@@ -18,6 +18,7 @@ spec:
       containers:
       - name: folding-at-home-gpu
         image: richarvey/foldingathome:gpu
+        imagePullPolicy: Always
         ports:
         - containerPort: 7396
         resources:
