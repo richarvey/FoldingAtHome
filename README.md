@@ -1,10 +1,10 @@
 ## Docker folding@home conatiner
 
 Debian stretch imagine with folding at home set to run as part of the containers team.
-You can override this by adding the flags:
+You can override all settings by adding the flags to the end of the docker run command:
 
 ```
---user=YOUR_NAME --team=TEAM_NUMBER --gpu=false --smp=true
+"--user=YOUR_NAME", "--team=TEAM_NUMBER", "--gpu=false", "--smp=true"
 ```
 
 Currently COVID19 is taking prioroty so its a great cause that we all need right now.
